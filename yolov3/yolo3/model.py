@@ -11,7 +11,13 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.regularizers import l2
 
-from yolo3.utils import compose
+import os 
+import sys
+
+ROOT_DIR = os.path.abspath('../../')
+sys.path.append(ROOT_DIR)
+
+from yolov3.yolo3.utils import compose
 
 
 @wraps(Conv2D)

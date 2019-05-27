@@ -5,6 +5,7 @@ Class definition of YOLO_v3 style detection model on image and video
 
 import colorsys
 import os
+import sys
 from timeit import default_timer as timer
 
 import numpy as np
@@ -13,16 +14,18 @@ from keras.models import load_model
 from keras.layers import Input
 from PIL import Image, ImageFont, ImageDraw
 
-from yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
-from yolo3.utils import letterbox_image
-import os
+ROOT_DIR = os.path.abspath('./')
+sys.path.append(ROOT_DIR)
+
+from yolov3.yolo3.model import yolo_eval, yolo_body, tiny_yolo_body
+from yolov3.yolo3.utils import letterbox_image
 from keras.utils import multi_gpu_model
 
 class YOLO(object):
     _defaults = {
-        "model_path": 'model_data/yolo.h5',
-        "anchors_path": 'model_data/yolo_anchors.txt',
-        "classes_path": 'model_data/coco_classes.txt',
+        "model_path": ROOT_DIR + '/yolov3/model_data/yolo.h5',
+        "anchors_path": ROOT_DIR  + '/yolov3/model_data/yolo_anchors.txt',
+        "classes_path": ROOT_DIR + '/yolov3/model_data/coco_classes.txt',
         "score" : 0.3,
         "iou" : 0.45,
         "model_image_size" : (416, 416),
@@ -126,12 +129,14 @@ class YOLO(object):
 
         print('Found {} boxes for {}'.format(len(out_boxes), 'img'))
 
-        font = ImageFont.truetype(font='font/FiraMono-Medium.otf',
+        font = ImageFont.truetype(font= ROOT_DIR + '/yolov3/font/FiraMono-Medium.otf',
                     size=np.floor(3e-2 * image.size[1] + 0.5).astype('int32'))
         thickness = (image.size[0] + image.size[1]) // 300
 
         for i, c in reversed(list(enumerate(out_classes))):
             predicted_class = self.class_names[c]
+            if predicted_class != 'person':
+                continue
             box = out_boxes[i]
             score = out_scores[i]
 
@@ -164,7 +169,7 @@ class YOLO(object):
 
         end = timer()
         print(end - start)
-        return image
+        return image, out_boxes
 
     def close_session(self):
         self.sess.close()
